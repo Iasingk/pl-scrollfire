@@ -1,0 +1,35 @@
+{
+  "name": "pl-contact-form",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sexar/pl-contact-form.git"
+  },
+  "keywords": [
+    "contact-form",
+    "javascript",
+    "typescript"
+  ],
+  "author": "cesarmejia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sexar/pl-contact-form/issues"
+  },
+  "homepage": "https://github.com/Sexar/pl-contact-form#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-livereload": "^3.8.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-stylus": "^2.6.0",
+    "gulp-typescript": "^3.2.2",
+    "gulp-uglify": "^3.0.0",
+    "typescript": "^2.5.3"
+  }
+}

@@ -49,7 +49,7 @@ gulp.task('watch', () => {
 
     livereload.listen();
 
-    gulp.watch(files, ['stylus', 'ts', 'reload']);
+    gulp.watch(files, ['reload']);
 });
 
 
@@ -96,8 +96,6 @@ gulp.task('ts', () => {
     // Source files.
     let srcFiles = [
         `${srcPath.ts}core/*.ts`,
-        `${srcPath.ts}element/*.ts`,
-        `${srcPath.ts}util/*.ts`,
         `${srcPath.ts}*.ts`
     ];
 

@@ -102,6 +102,7 @@ gulp.task('ts', () => {
 
     // Output file.
     let outputFile = 'pl-scrollfire.min.ts';
+    // let outputFile = 'pl-scrollfire.ts';
 
     return gulp.src(srcFiles)
         .pipe(plumber())

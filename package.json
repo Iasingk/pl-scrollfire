@@ -1,7 +1,7 @@
 {
-  "name": "pl-contact-form",
+  "name": "pl-scrollfire",
   "version": "1.0.0",
-  "description": "",
+  "description": "Script that detects if a group of elements is fully or partially inview or if has a marker over it.",
   "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,9 +11,11 @@
     "url": "git+https://github.com/Sexar/pl-contact-form.git"
   },
   "keywords": [
-    "contact-form",
     "javascript",
-    "typescript"
+    "typescript",
+    "inview",
+    "js",
+    "ts"
   ],
   "author": "cesarmejia",
   "license": "MIT",

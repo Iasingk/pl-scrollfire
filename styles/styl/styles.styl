@@ -6,13 +6,48 @@
 
 body,
 html
-  height 100%
   margin 0
-  width 100%
 
 body
   background-color #fff
   color #333
   font-family 'Source Sans Pro', sans-serif
   font-size 14px
+
+.block
+  height 75vh
+  position relative
+  width 100vw
+
+  h1
+    font-size 6em
+    font-weight 300
+    left 50%
+    margin 0
+    opacity 0
+    position absolute
+    text-align: center
+    text-shadow 1px 1px 1px rgba(0, 0, 0, 0.75)
+    top 50%
+    transition opacity .375s .250s, transform .375s .250s
+    transform translate(-50%, 0)
+    width 95%
+
+  &.inview
+    h1
+      opacity 1
+      transform translate(-50%, -50%)
+
+
+
+#about
+  background-color #cfd8dc
+#services
+  background-color #b0bec5
+#products
+  background-color #90a4ae
+#gallery
+  background-color #78909c
+#contact
+  background-color #607d8b
 

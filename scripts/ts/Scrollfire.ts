@@ -6,26 +6,41 @@ module pl {
     export class ScrollFire {
 
         // region Fields
+
         /**
          * @type {boolean}
          */
         private isScrolling: boolean = false;
 
         /**
-         * @type {any}
+         * @type {Object}
          */
-        private items: any = null;
+        private settings: object;
 
         // endregion
 
         /**
          * Create a Scroll Fire instance.
-         * @param {any} items
+         * @param {HTMLElement|NodeList} items
          * @param {Object} settings
          */
         constructor(items: any, settings: Object) {
             this.items = items;
 
+            this.settings = Util.extendsDefaults({
+                method: 'markerOver',
+                markerPercentage: 55
+            }, settings);
+
+            this.initEvents();
+        }
+
+        // region Private Methods
+
+        /**
+         * Initialize scroll fire elements.
+         */
+        private initEvents() {
             this.scrolling      = this.scrolling.bind(this);
             this.throttleScroll = this.throttleScroll.bind(this);
 
@@ -35,28 +50,49 @@ module pl {
             window.addEventListener("resize", this.throttleScroll, false);
         }
 
-        // region Private Methods
+        /**
+         * Handle on inview event.
+         * @param {HTMLElement} item
+         */
+        private onInview(item: HTMLElement) {
+            if (this.inview) {
+                this.inview.fire(item);
+            }
+        }
+
         /**
          * Validate if an item is inview.
          * @param {Event} ev
          */
         private scrolling(ev) {
-            let i, item, length = this.items.length;
+            let i, item;
+            let length: number = this.items.length;
+            let method: string = `is${ Util.capitalizeText(this.settings['method']) }`;
 
-            for (i = 0; item = this.items[i], i < length; i++) {
-                if (this.isPartiallyVisible(item)) {
-                    this.inview.fire();
+            try {
+                for (i = 0; item = this.items[i], i < length; i++) {
+                    if (this[method].call(this, item)) {
+                        Classie.addClass(item, 'inview');
+                        this.onInview(item);
+
+                    } else {
+                        Classie.removeClass(item, 'inview');
+
+                    }
                 }
-            }
+            } catch (e) { throw `${ this.settings['method'] } method does not exist.`; }
+
         }
 
         /**
          * Enhance scroll.
          * @param {Event} ev
          */
-        private throttleScroll(ev) {
+        private throttleScroll(ev?) {
+            let reqAnimFrame = this.reqAnimFrame;
+
             if (this.isScrolling === false) {
-                this.reqAnimFrame(() => {
+                reqAnimFrame(() => {
                     this.scrolling(ev);
                     this.isScrolling = false;
                 });
@@ -64,28 +100,32 @@ module pl {
 
             this.isScrolling = true;
         }
+
         // endregion
 
         // region Events
+
         /**
-         * @type {pl.Event}
+         * @type {pl.PLEvent}
          */
-        private _inview: Event = null;
+        private _inview: PLEvent = null;
 
         /**
          * Gets inview event.
-         * @returns {pl.Event}
+         * @returns {pl.PLEvent}
          */
-        get inview(): Event {
+        get inview(): PLEvent {
             if (!this._inview) {
-                this._inview = new Event();
+                this._inview = new PLEvent();
             }
 
             return this._inview;
         }
+
         // endregion
 
         // region Methods
+
         /**
          * Determine if item is partially visible.
          * @param {HTMLElement} item
@@ -119,24 +159,49 @@ module pl {
          * @returns {boolean}
          */
         isMarkerOver(item: HTMLElement): boolean {
+            let percent: number = (this.settings['markerPercentage'] / 100);
             let rect = item.getBoundingClientRect();
             let top = rect.top,
                 height = rect.height,
-                marker = window.innerHeight * .55;
+                marker = window.innerHeight * percent;
 
             return marker > top && (top + height) > marker;
         }
+
         // endregion
 
         // region Fields
-        /**
-         * requestAnimationFrame property.
-         * @type {any}
-         */
-        private _reqAnimFrame: any = null;
 
         /**
-         * Get requestAnimationFrame property.
+         * Items field.
+         * @type {HTMLElement|NodeList}
+         */
+        private _items: any = null;
+
+        /**
+         * Get items field.
+         * @returns {HTMLElement|NodeList}
+         */
+        get items(): any {
+            return this._items;
+        }
+
+        /**
+         * Set items field.
+         * @param {HTMLElement|NodeList} items
+         */
+        set items(items: any) {
+            this._items = items;
+        }
+
+        /**
+         * requestAnimationFrame field.
+         * @type {any}
+         */
+        private _reqAnimFrame: any;
+
+        /**
+         * Get requestAnimationFrame field.
          * @returns {any}
          */
         get reqAnimFrame(): any {
@@ -149,6 +214,7 @@ module pl {
 
             return this._reqAnimFrame;
         }
+
         // endregion
 
     }

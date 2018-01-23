@@ -5,8 +5,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>PL - ScrollFire</title>
-        <meta name="description" content="page-description">
+        <title>PL ScrollFire</title>
+        <meta name="description" content="Script that detects if a group of elements is fully or partially inview or if has a marker over it.">
         <meta name="keywords" content="page-keywords">
         <meta name="author" content="César Mejía">
         <meta name="robots" content="INDEX, FOLLOW, ARCHIVE">
@@ -20,22 +20,22 @@
         <!-- <link rel="apple-touch-icon" sizes="114x114" href="favicons/apple-touch-icon-114x114.png"> -->
 
         <!-- Schema properties -->
-        <meta itemprop="name" content="page-title">
-        <meta itemprop="description" content="page-description">
+        <meta itemprop="name" content="PL ScrollFire">
+        <meta itemprop="description" content="Script that detects if a group of elements is fully or partially inview or if has a marker over it.">
         <meta itemprop="url" content="page-url">
         <meta itemprop="image" content="image-url">
 
         <!-- Open Graph properties -->
         <meta property="fb:app_id" content="app-id">
         <meta property="og:site_name" content="name">
-        <meta property="og:title" content="page-title">
-        <meta property="og:description" content="page-description">
+        <meta property="og:title" content="PL ScrollFire">
+        <meta property="og:description" content="Script that detects if a group of elements is fully or partially inview or if has a marker over it.">
         <meta property="og:url" content="page-url">
         <meta property="og:image" content="image-url">
         <meta property="og:type" content="website">
 
         <!-- Twitter integration -->
-        <meta name="twitter:title" content="page-title">
+        <meta name="twitter:title" content="PL ScrollFire">
         <meta name="twitter:url" content="page-url">
         <meta name="twitter:image" content="image-url">
         <meta name="twitter:card" content="summary">
@@ -60,17 +60,49 @@
     </head>
     <body>
 
-        <div id="wrapper">
-            <h1>ScrollFire</h1>
-        </div>
+        <!-- About Block -->
+        <section class="block" id="about">
+            <h1>About</h1>
+        </section>
+        <!-- /.About Block -->
+
+        <!-- Serivces Block -->
+        <section class="block" id="services">
+            <h1>Services</h1>
+        </section>
+        <!-- /.Services Block -->
+
+        <!-- Products Block -->
+        <section class="block" id="products">
+            <h1>Products</h1>
+        </section>
+        <!-- /.Products Block -->
+
+        <!-- Gallery Block -->
+        <section class="block" id="gallery">
+            <h1>Gallery</h1>
+        </section>
+        <!-- /.Gallery Block -->
+
+        <!-- Contact Block -->
+        <section class="block" id="contact">
+            <h1>Contact</h1>
+        </section>
+        <!-- /.Contact Block -->
 
         <script src="scripts/js/pl-scrollfire.min.js"></script>
         <script>
-            (function (w) {
+            (function () {
                 'use strict';
 
+                let blocks = document.querySelectorAll('.block');
+                let scrollFire = new pl.ScrollFire(blocks, {
+                    method: 'markerOver',
+                    markerPercentage: 55
+                });
 
-            })(window);
+                scrollFire.inview.add((item) => { /* Do something fancy. */ });
+            })();
         </script>
     </body>
 </html>

@@ -175,10 +175,10 @@ var pl;
         // endregion
         /**
          * Create a Scroll Fire instance.
-         * @param {HTMLElement|HTMLCollection|Node|NodeList} items
+         * @param {HTMLElement|HTMLCollection|Node|NodeList} elements
          * @param {Object} settings
          */
-        function ScrollFire(items, settings) {
+        function ScrollFire(elements, settings) {
             // region Fields
             /**
              * @type {boolean}
@@ -193,20 +193,15 @@ var pl;
             // endregion
             // region Fields
             /**
-             * Items field.
-             * @type {HTMLElement|NodeList}
+             * Elements field.
+             * @type {HTMLElement|HTMLCollection|Node|NodeList}
              */
-            this._items = null;
-            this._items = [];
-            if (items instanceof HTMLElement || items instanceof Node) {
-                this._items = [items];
+            this._elements = null;
+            // Avoid create the instance if elements does not match with the allowed types.
+            if (!this.isAllowedType(elements)) {
+                throw 'Make sure that elements you\'re passing HTMLElement, HTMLCollection, Node or NodeList';
             }
-            else if (items instanceof HTMLCollection || items instanceof NodeList) {
-                this._items = items;
-            }
-            else {
-                throw 'The type of the items are invalid. Make sure that you\'re passing HTMLElement, HTMLCollection, Node or NodeList';
-            }
+            this._elements = elements;
             this.settings = pl.Util.extendsDefaults({
                 method: 'markerOver',
                 markerPercentage: 55,
@@ -229,33 +224,33 @@ var pl;
         };
         /**
          * Handle on inview event.
-         * @param {HTMLElement} item
+         * @param {HTMLElement} element
          */
-        ScrollFire.prototype.onInview = function (item) {
+        ScrollFire.prototype.onInview = function (element) {
             if (this.inview) {
-                this.inview.fire(item);
+                this.inview.fire(element);
             }
         };
         /**
-         * Validate if an item is inview.
+         * Validate if an element is inview.
          * @param {Event} ev
          */
         ScrollFire.prototype.scrolling = function (ev) {
-            var i, item;
-            var length = this.items.length;
+            var i, element;
+            var length = this.elements.length;
             var methodName = "is" + pl.Util.capitalizeText(this.settings['method']);
             var method = this[methodName];
             if ("undefined" === typeof method) {
                 throw methodName + " does not exist";
             }
             else {
-                for (i = 0; item = this.items[i], i < length; i++) {
-                    if (method.call(this, item)) {
-                        pl.Classie.addClass(item, 'inview');
-                        this.onInview(item);
+                for (i = 0; element = this.elements[i], i < length; i++) {
+                    if (method.call(this, element)) {
+                        pl.Classie.addClass(element, 'inview');
+                        this.onInview(element);
                     }
                     else {
-                        pl.Classie.removeClass(item, 'inview');
+                        pl.Classie.removeClass(element, 'inview');
                     }
                 }
             }
@@ -275,6 +270,21 @@ var pl;
             }
             this.isScrolling = true;
         };
+        /**
+         * Validate the type of instance of the element.
+         * @param {HTMLElement, HTMLCollection, Node, Node} element
+         * @returns {boolean}
+         */
+        ScrollFire.prototype.isAllowedType = function (element) {
+            var allowedTypes = [HTMLElement, HTMLCollection, Node, NodeList];
+            var i = 0;
+            for (; i < allowedTypes.length; i++) {
+                if (element instanceof allowedTypes[i]) {
+                    return true;
+                }
+            }
+            return false;
+        };
         Object.defineProperty(ScrollFire.prototype, "inview", {
             /**
              * Gets inview event.
@@ -292,54 +302,54 @@ var pl;
         // endregion
         // region Methods
         /**
-         * Determine if item is partially visible.
-         * @param {HTMLElement} item
-         * @returns boolean
-         */
-        ScrollFire.prototype.isPartiallyVisible = function (item) {
-            var rect = item.getBoundingClientRect();
-            var top = rect.top, bottom = rect.bottom, height = rect.height;
-            return ((top + height >= 0) && (height + window.innerHeight >= bottom));
-        };
-        /**
-         * Determine if item is fully visible.
-         * @param {HTMLElement} item
+         * Determine if element is fully visible.
+         * @param {HTMLElement|Node} element
          * @returns {boolean}
          */
-        ScrollFire.prototype.isFullyVisible = function (item) {
-            var rect = item.getBoundingClientRect();
+        ScrollFire.prototype.isFullyVisible = function (element) {
+            var rect = element.getBoundingClientRect();
             var top = rect.top, bottom = rect.bottom;
             return ((top >= 0) && (bottom <= window.innerHeight));
         };
         /**
-         * Determine if item is under the marker.
-         * @param {HTMLElement} item
+         * Determine if element is in range.
+         * @param {HTMLElement|Node} element
          * @returns {boolean}
          */
-        ScrollFire.prototype.isMarkerOver = function (item) {
+        ScrollFire.prototype.isInRange = function (element) {
+            var rangeMin = window.innerHeight * (this.settings['rangeMin'] / 100);
+            var rangeMax = window.innerHeight * (this.settings['rangeMax'] / 100);
+            var rect = element.getBoundingClientRect();
+            return rect.top <= rangeMax && rect.bottom >= rangeMin;
+        };
+        /**
+         * Determine if element is under the marker.
+         * @param {HTMLElement|Node} element
+         * @returns {boolean}
+         */
+        ScrollFire.prototype.isMarkerOver = function (element) {
             var percent = (this.settings['markerPercentage'] / 100);
-            var rect = item.getBoundingClientRect();
+            var rect = element.getBoundingClientRect();
             var top = rect.top, height = rect.height, marker = window.innerHeight * percent;
             return marker > top && (top + height) > marker;
         };
         /**
-         * Determine if item is in range.
-         * @param {HTMLElement} item
-         * @returns {boolean}
+         * Determine if element is partially visible.
+         * @param {HTMLElement|Node} element
+         * @returns boolean
          */
-        ScrollFire.prototype.isInRange = function (item) {
-            var rangeMin = window.innerHeight * (this.settings['rangeMin'] / 100);
-            var rangeMax = window.innerHeight * (this.settings['rangeMax'] / 100);
-            var rect = item.getBoundingClientRect();
-            return rect.top <= rangeMax && rect.bottom >= rangeMin;
+        ScrollFire.prototype.isPartiallyVisible = function (element) {
+            var rect = element.getBoundingClientRect();
+            var top = rect.top, bottom = rect.bottom, height = rect.height;
+            return ((top + height >= 0) && (height + window.innerHeight >= bottom));
         };
-        Object.defineProperty(ScrollFire.prototype, "items", {
+        Object.defineProperty(ScrollFire.prototype, "elements", {
             /**
-             * Get items field.
-             * @returns {HTMLElement|NodeList}
+             * Get elements field.
+             * @returns {HTMLElement|HTMLCollection|Node|NodeList}
              */
             get: function () {
-                return this._items;
+                return this._elements;
             },
             enumerable: true,
             configurable: true

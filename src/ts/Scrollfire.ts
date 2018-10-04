@@ -13,6 +13,11 @@ module pl {
         private isScrolling: boolean = false;
 
         /**
+         * @type {function}
+         */
+        private method: () => {};
+
+        /**
          * @type {Object}
          */
         private settings: object;
@@ -21,19 +26,11 @@ module pl {
 
         /**
          * Create a Scroll Fire instance.
-         * @param {HTMLElement|HTMLCollection|Node|NodeList} items
+         * @param {HTMLElement|HTMLCollection|Node|NodeList} elements
          * @param {Object} settings
          */
-        constructor(items: any, settings: Object) {
-            this._items = [];
-
-            if (items instanceof HTMLElement || items instanceof Node) {
-                this._items = [items];
-            } else if (items instanceof HTMLCollection || items instanceof NodeList) {
-                this._items = items;
-            } else {
-                throw 'The type of the items are invalid. Make sure that you\'re passing HTMLElement, HTMLCollection, Node or NodeList';
-            }
+        constructor(elements: any, settings: Object) {
+            let methodName: string = `is${ Util.capitalizeText(this.settings['method']) }`;
 
             this.settings = Util.extendsDefaults({
                 method: 'markerOver',
@@ -41,6 +38,11 @@ module pl {
                 rangeMin: 10,
                 rangeMax: 90
             }, settings);
+
+            // Avoid create the instance if elements does not match with the allowed types.
+            if (!this.isAllowedType(elements)) { throw 'Make sure that elements you\'re passing HTMLElement, HTMLCollection, Node or NodeList'; }
+
+            this._elements = elements;
 
             this.initEvents();
         }
@@ -62,34 +64,34 @@ module pl {
 
         /**
          * Handle on inview event.
-         * @param {HTMLElement} item
+         * @param {HTMLElement} element
          */
-        private onInview(item: HTMLElement) {
+        private onInview(element: HTMLElement) {
             if (this.inview) {
-                this.inview.fire(item);
+                this.inview.fire(element);
             }
         }
 
         /**
-         * Validate if an item is inview.
+         * Validate if an element is inview.
          * @param {Event} ev
          */
         private scrolling(ev) {
-            let i, item;
-            let length: number = this.items.length;
+            let i, element;
+            let length: number = this.elements.length;
             let methodName: string = `is${ Util.capitalizeText(this.settings['method']) }`;
             let method = this[methodName];
 
             if ("undefined" === typeof method) {
                 throw `${methodName} does not exist`;
             } else {
-                for (i = 0; item = this.items[i], i < length; i++) {
-                    if (method.call(this, item)) {
-                        Classie.addClass(item, 'inview');
-                        this.onInview(item);
+                for (i = 0; element = this.elements[i], i < length; i++) {
+                    if (method.call(this, element)) {
+                        Classie.addClass(element, 'inview');
+                        this.onInview(element);
 
                     } else {
-                        Classie.removeClass(item, 'inview');
+                        Classie.removeClass(element, 'inview');
 
                     }
                 }
@@ -112,6 +114,24 @@ module pl {
             }
 
             this.isScrolling = true;
+        }
+
+        /**
+         * Validate the type of instance of the element.
+         * @param {HTMLElement, HTMLCollection, Node, Node} element
+         * @returns {boolean}
+         */
+        private isAllowedType(element: any) {
+            let allowedTypes = [HTMLElement, HTMLCollection, Node, NodeList];
+            let i = 0;
+
+            for (; i < allowedTypes.length; i++) {
+                if (element instanceof allowedTypes[i]) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // endregion
@@ -140,26 +160,12 @@ module pl {
         // region Methods
 
         /**
-         * Determine if item is partially visible.
-         * @param {HTMLElement} item
-         * @returns boolean
-         */
-        isPartiallyVisible(item: HTMLElement): boolean {
-            let rect = item.getBoundingClientRect();
-            let top    = rect.top,
-                bottom = rect.bottom,
-                height = rect.height;
-
-            return ((top + height >= 0) && (height + window.innerHeight >= bottom));
-        }
-
-        /**
-         * Determine if item is fully visible.
-         * @param {HTMLElement} item
+         * Determine if element is fully visible.
+         * @param {HTMLElement|Node} element
          * @returns {boolean}
          */
-        isFullyVisible(item: HTMLElement): boolean {
-            let rect = item.getBoundingClientRect();
+        isFullyVisible(element: HTMLElement): boolean {
+            let rect = element.getBoundingClientRect();
             let top = rect.top,
                 bottom = rect.bottom;
 
@@ -167,13 +173,26 @@ module pl {
         }
 
         /**
-         * Determine if item is under the marker.
-         * @param {HTMLElement} item
+         * Determine if element is in range.
+         * @param {HTMLElement|Node} element
          * @returns {boolean}
          */
-        isMarkerOver(item: HTMLElement): boolean {
+        isInRange(element: HTMLElement): boolean {
+            let rangeMin: number = window.innerHeight * (this.settings['rangeMin'] / 100);
+            let rangeMax: number = window.innerHeight * (this.settings['rangeMax'] / 100);
+            let rect = element.getBoundingClientRect();
+
+            return rect.top <= rangeMax && rect.bottom >= rangeMin;
+        }
+
+        /**
+         * Determine if element is under the marker.
+         * @param {HTMLElement|Node} element
+         * @returns {boolean}
+         */
+        isMarkerOver(element: HTMLElement): boolean {
             let percent: number = (this.settings['markerPercentage'] / 100);
-            let rect = item.getBoundingClientRect();
+            let rect = element.getBoundingClientRect();
             let top = rect.top,
                 height = rect.height,
                 marker = window.innerHeight * percent;
@@ -182,16 +201,17 @@ module pl {
         }
 
         /**
-         * Determine if item is in range.
-         * @param {HTMLElement} item
-         * @returns {boolean}
+         * Determine if element is partially visible.
+         * @param {HTMLElement|Node} element
+         * @returns boolean
          */
-        isInRange(item: HTMLElement): boolean {
-            let rangeMin: number = window.innerHeight * (this.settings['rangeMin'] / 100);
-            let rangeMax: number = window.innerHeight * (this.settings['rangeMax'] / 100);
-            let rect = item.getBoundingClientRect();
+        isPartiallyVisible(element: HTMLElement): boolean {
+            let rect = element.getBoundingClientRect();
+            let top    = rect.top,
+                bottom = rect.bottom,
+                height = rect.height;
 
-            return rect.top <= rangeMax && rect.bottom >= rangeMin;
+            return ((top + height >= 0) && (height + window.innerHeight >= bottom));
         }
 
         // endregion
@@ -199,17 +219,17 @@ module pl {
         // region Fields
 
         /**
-         * Items field.
-         * @type {HTMLElement|NodeList}
+         * Elements field.
+         * @type {HTMLElement|HTMLCollection|Node|NodeList}
          */
-        private _items: any = null;
+        private _elements: any = null;
 
         /**
-         * Get items field.
-         * @returns {HTMLElement|NodeList}
+         * Get elements field.
+         * @returns {HTMLElement|HTMLCollection|Node|NodeList}
          */
-        get items(): any {
-            return this._items;
+        get elements(): any {
+            return this._elements;
         }
 
         /**

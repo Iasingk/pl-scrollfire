@@ -21,15 +21,25 @@ module pl {
 
         /**
          * Create a Scroll Fire instance.
-         * @param {HTMLElement|NodeList} items
+         * @param {HTMLElement|HTMLCollection|Node|NodeList} items
          * @param {Object} settings
          */
         constructor(items: any, settings: Object) {
-            this.items = items;
+            this._items = [];
+
+            if (items instanceof HTMLElement || items instanceof Node) {
+                this._items = [items];
+            } else if (items instanceof HTMLCollection || items instanceof NodeList) {
+                this._items = items;
+            } else {
+                throw 'The type of the items are invalid. Make sure that you\'re passing HTMLElement, HTMLCollection, Node or NodeList';
+            }
 
             this.settings = Util.extendsDefaults({
                 method: 'markerOver',
-                markerPercentage: 55
+                markerPercentage: 55,
+                rangeMin: 10,
+                rangeMax: 90
             }, settings);
 
             this.initEvents();
@@ -67,11 +77,14 @@ module pl {
         private scrolling(ev) {
             let i, item;
             let length: number = this.items.length;
-            let method: string = `is${ Util.capitalizeText(this.settings['method']) }`;
+            let methodName: string = `is${ Util.capitalizeText(this.settings['method']) }`;
+            let method = this[methodName];
 
-            try {
+            if ("undefined" === typeof method) {
+                throw `${methodName} does not exist`;
+            } else {
                 for (i = 0; item = this.items[i], i < length; i++) {
-                    if (this[method].call(this, item)) {
+                    if (method.call(this, item)) {
                         Classie.addClass(item, 'inview');
                         this.onInview(item);
 
@@ -80,7 +93,7 @@ module pl {
 
                     }
                 }
-            } catch (e) { throw `${ this.settings['method'] } method does not exist.`; }
+            }
 
         }
 
@@ -168,6 +181,19 @@ module pl {
             return marker > top && (top + height) > marker;
         }
 
+        /**
+         * Determine if item is in range.
+         * @param {HTMLElement} item
+         * @returns {boolean}
+         */
+        isInRange(item: HTMLElement): boolean {
+            let rangeMin: number = window.innerHeight * (this.settings['rangeMin'] / 100);
+            let rangeMax: number = window.innerHeight * (this.settings['rangeMax'] / 100);
+            let rect = item.getBoundingClientRect();
+
+            return rect.top <= rangeMax && rect.bottom >= rangeMin;
+        }
+
         // endregion
 
         // region Fields
@@ -184,14 +210,6 @@ module pl {
          */
         get items(): any {
             return this._items;
-        }
-
-        /**
-         * Set items field.
-         * @param {HTMLElement|NodeList} items
-         */
-        set items(items: any) {
-            this._items = items;
         }
 
         /**

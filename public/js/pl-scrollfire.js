@@ -48,7 +48,7 @@ var pl;
     pl.PLEvent = PLEvent;
 })(pl || (pl = {}));
 /**
- * Created by developergoplek on 23/01/18.
+ * Created by cesarmejia on 07/02/2018.
  */
 (function (pl) {
     var Classie = /** @class */ (function () {
@@ -60,10 +60,17 @@ var pl;
          * @param {string} className
          */
         Classie.addClass = function (elem, className) {
-            if (elem.classList)
-                elem.classList.add(className);
-            else if (!Classie.hasClass(elem, className))
-                elem.className += " " + className;
+            var parts = className.split(" "), i = 0;
+            if (elem.classList) {
+                for (; i < parts.length; i++) {
+                    elem.classList.add(parts[i]);
+                }
+            }
+            else if (!Classie.hasClass(elem, className)) {
+                for (; i < parts.length; i++) {
+                    elem.className += " " + parts[i];
+                }
+            }
         };
         /**
          * Determine whether any of the matched elements are assigned the given class.
@@ -82,10 +89,37 @@ var pl;
          * @param {string} className
          */
         Classie.removeClass = function (elem, className) {
+            var parts = className.split(" "), i = 0;
+            if (elem.classList) {
+                for (; i < parts.length; i++) {
+                    elem.classList.remove(parts[i]);
+                }
+            }
+            else {
+                for (; i < parts.length; i++) {
+                    elem.className = elem.className.replace(new RegExp("\\b" + parts[i] + "\\b", "g"), '');
+                }
+            }
+        };
+        /**
+         * Remove all classes in element.
+         * @param {HTMLElement} elem
+         */
+        Classie.reset = function (elem) {
+            elem.className = '';
+        };
+        /**
+         * Add or remove class from element.
+         * @param {HTMLElement} elem
+         * @param {string} className
+         */
+        Classie.toggleClass = function (elem, className) {
             if (elem.classList)
-                elem.classList.remove(className);
+                elem.classList.toggle(className);
             else
-                elem.className = elem.className.replace(new RegExp("\\b" + className + "\\b", "g"), '');
+                Classie.hasClass(elem, className)
+                    ? Classie.removeClass(elem, className)
+                    : Classie.addClass(elem, className);
         };
         return Classie;
     }());
@@ -141,7 +175,7 @@ var pl;
         // endregion
         /**
          * Create a Scroll Fire instance.
-         * @param {HTMLElement|NodeList} items
+         * @param {HTMLElement|HTMLCollection|Node|NodeList} items
          * @param {Object} settings
          */
         function ScrollFire(items, settings) {
@@ -163,10 +197,21 @@ var pl;
              * @type {HTMLElement|NodeList}
              */
             this._items = null;
-            this.items = items;
+            this._items = [];
+            if (items instanceof HTMLElement || items instanceof Node) {
+                this._items = [items];
+            }
+            else if (items instanceof HTMLCollection || items instanceof NodeList) {
+                this._items = items;
+            }
+            else {
+                throw 'The type of the items are invalid. Make sure that you\'re passing HTMLElement, HTMLCollection, Node or NodeList';
+            }
             this.settings = pl.Util.extendsDefaults({
                 method: 'markerOver',
-                markerPercentage: 55
+                markerPercentage: 55,
+                rangeMin: 10,
+                rangeMax: 90
             }, settings);
             this.initEvents();
         }
@@ -198,10 +243,14 @@ var pl;
         ScrollFire.prototype.scrolling = function (ev) {
             var i, item;
             var length = this.items.length;
-            var method = "is" + pl.Util.capitalizeText(this.settings['method']);
-            try {
+            var methodName = "is" + pl.Util.capitalizeText(this.settings['method']);
+            var method = this[methodName];
+            if ("undefined" === typeof method) {
+                throw methodName + " does not exist";
+            }
+            else {
                 for (i = 0; item = this.items[i], i < length; i++) {
-                    if (this[method].call(this, item)) {
+                    if (method.call(this, item)) {
                         pl.Classie.addClass(item, 'inview');
                         this.onInview(item);
                     }
@@ -209,9 +258,6 @@ var pl;
                         pl.Classie.removeClass(item, 'inview');
                     }
                 }
-            }
-            catch (e) {
-                throw this.settings['method'] + " method does not exist.";
             }
         };
         /**
@@ -276,6 +322,17 @@ var pl;
             var top = rect.top, height = rect.height, marker = window.innerHeight * percent;
             return marker > top && (top + height) > marker;
         };
+        /**
+         * Determine if item is in range.
+         * @param {HTMLElement} item
+         * @returns {boolean}
+         */
+        ScrollFire.prototype.isInRange = function (item) {
+            var rangeMin = window.innerHeight * (this.settings['rangeMin'] / 100);
+            var rangeMax = window.innerHeight * (this.settings['rangeMax'] / 100);
+            var rect = item.getBoundingClientRect();
+            return rect.top <= rangeMax && rect.bottom >= rangeMin;
+        };
         Object.defineProperty(ScrollFire.prototype, "items", {
             /**
              * Get items field.
@@ -283,13 +340,6 @@ var pl;
              */
             get: function () {
                 return this._items;
-            },
-            /**
-             * Set items field.
-             * @param {HTMLElement|NodeList} items
-             */
-            set: function (items) {
-                this._items = items;
             },
             enumerable: true,
             configurable: true

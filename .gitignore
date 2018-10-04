@@ -1,3 +1,7 @@
 # Folders
 /.idea/
 /node_modules/
+
+# Files
+.DS_Store
+package-lock.json

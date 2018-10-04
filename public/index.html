@@ -56,7 +56,7 @@
         <meta name="format-detection" content="telephone=no">
 
         <!-- Page Styles (dev) -->
-        <link href="styles/css/styles.css" rel="stylesheet">
+        <link href="css/styles.css" rel="stylesheet">
     </head>
     <body>
 
@@ -90,18 +90,24 @@
         </section>
         <!-- /.Contact Block -->
 
-        <script src="scripts/js/pl-scrollfire.min.js"></script>
+        <script src="js/pl-scrollfire.min.js"></script>
         <script>
             (function () {
                 'use strict';
 
-                let blocks = document.querySelectorAll('.block');
-                let scrollFire = new pl.ScrollFire(blocks, {
+                let elements = document.querySelectorAll('.block');
+                let scrollFire = new pl.ScrollFire(elements, {
                     method: 'markerOver',
                     markerPercentage: 55
                 });
+                let currentElement;
 
-                scrollFire.inview.add((item) => { /* Do something fancy. */ });
+                scrollFire.inview.add((element) => {
+                    if (currentElement !== element) {
+                        currentElement = element;
+                        console.log("Current section inview is: %s", currentElement.id);
+                    }
+                });
             })();
         </script>
     </body>

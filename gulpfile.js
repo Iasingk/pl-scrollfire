@@ -12,14 +12,15 @@ const livereload   = require('gulp-livereload');
 
 
 let srcPath = {
-    styl: 'styles/styl/',
-    ts  : 'scripts/ts/',
-    root: ''
+    styl: 'src/styl/',
+    ts  : 'src/ts/',
+    root: 'src/'
 };
 
 let destPath = {
-    css: 'styles/css/',
-    js : 'scripts/js/'
+    css : 'public/css/',
+    js  : 'public/js/',
+    root: 'public/'
 };
 
 // ---------------------------------------------------------------------

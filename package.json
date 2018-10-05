@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Sexar/pl-contact-form.git"
+    "url": "git+https://github.com/cesarmejiag/pl-scrollfire.git"
   },
   "keywords": [
     "javascript",
@@ -20,9 +20,9 @@
   "author": "cesarmejia",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Sexar/pl-contact-form/issues"
+    "url": "https://github.com/cesarmejiag/pl-scrollfire/issues"
   },
-  "homepage": "https://github.com/Sexar/pl-contact-form#readme",
+  "homepage": "https://github.com/cesarmejiag/pl-scrollfire#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^4.0.0",

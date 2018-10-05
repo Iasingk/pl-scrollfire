@@ -30,8 +30,6 @@ module pl {
          * @param {Object} settings
          */
         constructor(elements: any, settings: Object) {
-            let methodName: string = `is${ Util.capitalizeText(this.settings['method']) }`;
-
             this.settings = Util.extendsDefaults({
                 method: 'markerOver',
                 markerPercentage: 55,
@@ -39,11 +37,15 @@ module pl {
                 rangeMax: 90
             }, settings);
 
+            this.method = this[`is${ Util.capitalizeText(this.settings['method']) }`];
+
             // Avoid create the instance if elements does not match with the allowed types.
             if (!this.isAllowedType(elements)) { throw 'Make sure that elements you\'re passing HTMLElement, HTMLCollection, Node or NodeList'; }
 
-            this._elements = elements;
+            // Avoid create the instance if the method does not exists.
+            if ("function" !== typeof this.method) { throw `Method ${this.settings.method} does not exist`; }
 
+            this._elements = elements;
             this.initEvents();
         }
 
@@ -77,23 +79,17 @@ module pl {
          * @param {Event} ev
          */
         private scrolling(ev) {
-            let i, element;
-            let length: number = this.elements.length;
-            let methodName: string = `is${ Util.capitalizeText(this.settings['method']) }`;
-            let method = this[methodName];
+            let elements: any = "length" in this.elements ? this.elements : [this.elements];
+            let i = 0, length = elements.length;
 
-            if ("undefined" === typeof method) {
-                throw `${methodName} does not exist`;
-            } else {
-                for (i = 0; element = this.elements[i], i < length; i++) {
-                    if (method.call(this, element)) {
-                        Classie.addClass(element, 'inview');
-                        this.onInview(element);
+            for (; i < length; i++) {
+                if (this.method.call(this, elements[i])) {
+                    Classie.addClass(elements[i], 'inview');
+                    this.onInview(elements[i]);
 
-                    } else {
-                        Classie.removeClass(element, 'inview');
+                } else {
+                    Classie.removeClass(elements[i], 'inview');
 
-                    }
                 }
             }
 

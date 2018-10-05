@@ -95,7 +95,7 @@ scrollFire.inview.add((element) => { /* ... */ });
 </table>
 
 ### Getters
-You can access to elements of `pl.Modal` as read only with the follow getters:
+You can access to the elements with the scrollfire instance was created and the requestAnimationFrame with the follow getters:
 
 <table>
     <tr>
